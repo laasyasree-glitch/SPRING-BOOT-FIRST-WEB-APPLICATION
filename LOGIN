@@ -1,19 +1,55 @@
+/spring-boot-first-web-application/src/main/java/com/springboot/web/springbootfirstwebapplication/SpringBootFirstWebApplication.java
+
+package com.springboot.web.springbootfirstwebapplication;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpringBootFirstWebApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringBootFirstWebApplication.class, args);
+		//Launches SpringBootWebApplication class
+	}
+
+}
+
+
 /spring-boot-first-web-application/src/main/java/com/springboot/web/springbootfirstwebapplication/controller/LoginController.java
 
 package com.springboot.web.springbootfirstwebapplication.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 // /login=>"HELLO WORLD"
 @Controller //To spring
 public class LoginController {
-	
-	@RequestMapping("/login")
-	public String loginMessage() {
+	//Injected Automatically
+	@Autowired
+	LoginService service = new LoginService();
+	@RequestMapping(value="/login",method=RequestMethod.GET)
+	public String ShowLoginPage(ModelMap model) {
 		return "login";
 	}
+	@RequestMapping(value="/login",method=RequestMethod.POST)
+	public String showWelcomePage(@RequestParam String name,@RequestParam String password,  ModelMap model) {
+		boolean validation = service.validate(name,password);
+		if(!validation) {
+			model.put("message", "INVALID CREDENTIALS");
+			return "login";
+		}
+		model.put("name", name);
+		model.put("password", password);
+		return "welcome";
+	}
 }
+
 
 /spring-boot-first-web-application/src/main/resources/application.properties
 
@@ -85,6 +121,39 @@ server.port=9090
 <title>First Web Application</title>
 </head>
 <body>
-My First JSP!!! Welcome
+<font color="red">${message}</font>
+<form method="post">
+Name: <input type="text" name="name" />
+Password: <input type="password" name="password" />
+<input type="submit"/>
+</form>
 </body>
 </html>
+
+/spring-boot-first-web-application/src/main/webapp/WEB-INF/jsp/welcome.jsp
+
+<html>
+<head>
+<title>First Web Application</title>
+</head>
+<body>
+WELCOME!!! ${name}
+</form>
+</body>
+</html>
+
+/spring-boot-first-web-application/src/main/java/com/springboot/web/springbootfirstwebapplication/controller/LoginService.java
+
+package com.springboot.web.springbootfirstwebapplication.controller;
+
+import org.springframework.stereotype.Component;
+
+//Spring Bean
+@Component
+public class LoginService {
+	public boolean validate(String userid,String password) {
+		if(userid.equalsIgnoreCase("laasya") && password.equalsIgnoreCase("kls"))
+			return true;
+		return false;
+	}
+}
